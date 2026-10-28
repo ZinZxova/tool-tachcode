@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JerryMod Split Tool</title>
+<style>
+  body { font-family: sans-serif; background: #07070d; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+  .box { background: #0f0f1a; padding: 30px; border-radius: 15px; border: 1px solid #ff3355; text-align: center; width: 100%; max-width: 400px; }
+  h1 { color: #ff3355; margin-top: 0; }
+  input[type="file"] { display: none; }
+  .btn { background: #ff3355; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin-bottom: 10px; font-weight: bold; transition: 0.2s; }
+  .btn:hover { background: #e62e4d; }
+  .btn:disabled { background: #555; cursor: not-allowed; }
+  .drop { border: 2px dashed #555; padding: 20px; border-radius: 10px; margin-bottom: 20px; cursor: pointer; }
+  .drop:hover { border-color: #ff3355; }
+  .status { font-size: 14px; margin-top: 15px; color: #00ff88; min-height: 20px; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h1>⚡ TÁCH FILE</h1>
+  
+  <label class="drop" id="drop">
+    <div>📁 Bấm vào đây để chọn file</div>
+    <input type="file" id="fileInput" accept=".html,.txt">
+  </label>
+
+  <div class="status" id="status">Chưa chọn file...</div>
+  
+  <button class="btn" id="btnAll" disabled style="margin-top: 15px;">TẢI VỀ 3 FILE</button>
+</div>
+
+<script>
+  var drop = document.getElementById('drop');
+  var fileInput = document.getElementById('fileInput');
+  var statusDiv = document.getElementById('status');
+  var btnAll = document.getElementById('btnAll');
+
+  var cssOut = "";
+  var jsOut = "";
+  var htmlOut = "";
+
+  drop.addEventListener('click', function() { fileInput.click(); });
+  
+  fileInput.addEventListener('change', function(e) {
+    if (e.target.files[0]) {
+      statusDiv.innerText = "Đang đọc file...";
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        tachFile(ev.target.result);
+      };
+      reader.readAsText(e.target.files[0], 'UTF-8');
+    }
+  });
+
+  function tachFile(html) {
+    try {
+      var cssStart = html.indexOf('<style>');
+      var cssEnd = html.indexOf('</style>');
+      if (cssStart !== -1 && cssEnd !== -1) {
+        cssOut = html.substring(cssStart + 7, cssEnd).trim();
+      }
+
+      jsOut = "";
+      var tempHtml = html;
+      while (tempHtml.indexOf('<script>') !== -1) {
+        var sStart = tempHtml.indexOf('<script>');
+        var sEnd = tempHtml.indexOf('</script>');
+        if (sStart !== -1 && sEnd !== -1) {
+          var code = tempHtml.substring(sStart + 8, sEnd);
+          jsOut += code + "\n\n";
+          tempHtml = tempHtml.substring(sEnd + 9);
+        } else {
+          break;
+        }
+      }
+
+      var secStart = jsOut.indexOf("BẢO MẬT CẤP CAO");
+      if (secStart !== -1) {
+        var realStart = jsOut.lastIndexOf("(function()", secStart);
+        if (realStart !== -1) {
+          jsOut = jsOut.substring(0, realStart);
+        }
+      }
+      var secStart2 = jsOut.indexOf("BẢO MẬT THỨ HAI");
+      if (secStart2 !== -1) {
+        var realStart2 = jsOut.lastIndexOf("(function()", secStart2);
+        if (realStart2 !== -1) {
+          jsOut = jsOut.substring(0, realStart2);
+        }
+      }
+
+      htmlOut = html.replace(/<style[\s\S]*?<\/style>/i, '<link rel="stylesheet" href="style.css">');
+      htmlOut = htmlOut.replace(/<script[\s\S]*?<\/script>/gi, '');
+      htmlOut = htmlOut.replace('</body>', '<script src="script.js"></script>\n</body>');
+
+      statusDiv.innerText = "Tách thành công! Bấm nút bên dưới.";
+      statusDiv.style.color = "#00ff88";
+      btnAll.disabled = false;
+      
+    } catch (err) {
+      statusDiv.innerText = "Lỗi: File không đúng định dạng!";
+      statusDiv.style.color = "#ff3355";
+    }
+  }
+
+  function download(filename, text) {
+    if (!text) return;
+    var blob = new Blob(['\uFEFF' + text], { type: 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 100);
+  }
+
+  btnAll.addEventListener('click', function() {
+    download('style.css', cssOut);
+    setTimeout(function() { download('script.js', jsOut); }, 500);
+    setTimeout(function() { download('index.html', htmlOut); }, 1000);
+    statusDiv.innerText = "Đang tải 3 file xuống...";
+  });
+</script>
+
+</body>
+</html>
