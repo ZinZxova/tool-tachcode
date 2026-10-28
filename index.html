@@ -3,127 +3,1180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JerryMod Split Tool</title>
+<title>Code Splitter - Tách HTML/CSS/JS</title>
 <style>
-  body { font-family: sans-serif; background: #07070d; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-  .box { background: #0f0f1a; padding: 30px; border-radius: 15px; border: 1px solid #ff3355; text-align: center; width: 100%; max-width: 400px; }
-  h1 { color: #ff3355; margin-top: 0; }
-  input[type="file"] { display: none; }
-  .btn { background: #ff3355; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin-bottom: 10px; font-weight: bold; transition: 0.2s; }
-  .btn:hover { background: #e62e4d; }
-  .btn:disabled { background: #555; cursor: not-allowed; }
-  .drop { border: 2px dashed #555; padding: 20px; border-radius: 10px; margin-bottom: 20px; cursor: pointer; }
-  .drop:hover { border-color: #ff3355; }
-  .status { font-size: 14px; margin-top: 15px; color: #00ff88; min-height: 20px; word-break: break-all; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f1117;
+    --panel: #181b24;
+    --panel-2: #1f2330;
+    --border: #2a3040;
+    --text: #e4e7ee;
+    --muted: #8b93a7;
+    --accent: #6c8cff;
+    --accent-2: #4a6cf7;
+    --green: #3ddc84;
+    --orange: #ffb454;
+    --red: #ff5c5c;
+    --purple: #b48cff;
+    --radius: 10px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a1e2e 0%, #141822 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    box-shadow: 0 4px 14px rgba(108,140,255,.35);
+  }
+
+  .brand h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .3px;
+  }
+
+  .brand p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+  }
+
+  .btn:hover {
+    background: #262b3b;
+    border-color: #3a4155;
+    transform: translateY(-1px);
+  }
+
+  .btn:active { transform: translateY(0); }
+
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: none;
+    box-shadow: 0 4px 14px rgba(108,140,255,.3);
+  }
+
+  .btn.primary:hover {
+    box-shadow: 0 6px 20px rgba(108,140,255,.5);
+  }
+
+  .btn.green {
+    background: linear-gradient(135deg, #2fb96a, #26a058);
+    border: none;
+    box-shadow: 0 4px 14px rgba(61,220,132,.25);
+  }
+
+  .btn.green:hover {
+    box-shadow: 0 6px 20px rgba(61,220,132,.45);
+  }
+
+  .btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .workspace {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    min-height: 0;
+  }
+
+  .pane {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .pane-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--panel-2);
+    flex-wrap: wrap;
+  }
+
+  .pane-title {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .stats {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 12px;
+  }
+
+  .pane-body {
+    flex: 1;
+    overflow: auto;
+    position: relative;
+  }
+
+  textarea, pre {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 16px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    tab-size: 2;
+  }
+
+  textarea::placeholder { color: #4a5163; }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tab {
+    padding: 7px 14px;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all .15s;
+    font-family: inherit;
+  }
+
+  .tab:hover { color: var(--text); background: #262b3b; }
+
+  .tab.active {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  .tab .badge {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .tab.html .badge { background: var(--orange); color: #000; }
+  .tab.css .badge { background: var(--accent); }
+  .tab.js .badge { background: var(--green); color: #000; }
+
+  .output-content {
+    height: 100%;
+    overflow: auto;
+    padding: 16px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre;
+    color: #cdd3e0;
+    tab-size: 2;
+  }
+
+  .output-content:empty::before {
+    content: 'Kết quả tách code sẽ xuất hiện ở đây...';
+    color: #4a5163;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .dropzone {
+    flex: 1;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 40px;
+    margin: 16px;
+    cursor: pointer;
+    transition: all .2s;
+    background: var(--panel);
+  }
+
+  .dropzone:hover {
+    border-color: var(--accent);
+    background: rgba(108,140,255,.05);
+  }
+
+  .dropzone.dragover {
+    border-color: var(--accent);
+    background: rgba(108,140,255,.1);
+    transform: scale(1.01);
+  }
+
+  .dropzone .icon {
+    font-size: 56px;
+    opacity: .6;
+  }
+
+  .dropzone .title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .dropzone .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 360px;
+    line-height: 1.6;
+  }
+
+  .file-info {
+    font-size: 12px;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    transform: translateX(120%);
+    transition: transform .3s ease;
+    z-index: 9999;
+    max-width: 320px;
+  }
+
+  .toast.show { transform: translateX(0); }
+  .toast.error { border-left-color: var(--red); }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox input {
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #4a5163;
+    font-size: 13px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .copy-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 6px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s;
+    font-family: inherit;
+  }
+
+  .copy-btn:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: #2a3040;
+    border-radius: 5px;
+    border: 2px solid var(--panel);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #3a4155; }
+
+  @media (max-width: 900px) {
+    .workspace {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
+    }
+    header { padding: 14px 16px; }
+    .brand h1 { font-size: 16px; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
 </style>
 </head>
 <body>
 
-<div class="box">
-  <h1>⚡ TÁCH FILE</h1>
-  
-  <label class="drop" id="drop">
-    <div>📁 Bấm vào đây để chọn file</div>
-    <input type="file" id="fileInput" accept=".html,.txt">
-  </label>
+<header>
+  <div class="brand">
+    <div class="logo">⚡</div>
+    <div>
+      <h1>Code Splitter</h1>
+      <p>Tách HTML thành 3 file: index.html + style.css + script.js</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="clearBtn">🗑️ Xóa tất cả</button>
+    <button class="btn" id="sampleBtn">📝 Load mẫu</button>
+    <button class="btn primary" id="splitBtn">⚡ Tách code</button>
+    <button class="btn green" id="downloadBtn" disabled>⬇️ Tải tất cả (.zip)</button>
+  </div>
+</header>
 
-  <div class="status" id="status">Chưa chọn file...</div>
-  
-  <button class="btn" id="btnAll" disabled style="margin-top: 15px;">TẢI VỀ 3 FILE</button>
-</div>
+<main class="workspace">
+  <!-- LEFT: INPUT -->
+  <section class="pane">
+    <div class="pane-header">
+      <div class="pane-title">
+        <span class="dot"></span>
+        <span>Input - File HTML / TXT</span>
+      </div>
+      <div class="stats" id="inputStats">
+        <span>0 dòng</span>
+        <span>0 ký tự</span>
+      </div>
+    </div>
+    <div class="pane-body" id="inputBody">
+      <div class="dropzone" id="dropzone">
+        <div class="icon">📂</div>
+        <div class="title">Kéo thả file vào đây</div>
+        <div class="subtitle">
+          Hỗ trợ file <b>.html</b>, <b>.htm</b>, <b>.txt</b> chứa code HTML đầy đủ<br>
+          Hoặc click để chọn file từ máy tính
+        </div>
+        <button class="btn primary" style="margin-top:8px;">📁 Chọn file</button>
+      </div>
+      <textarea id="inputCode" placeholder="Hoặc paste code HTML vào đây...&#10;&#10;Ví dụ:&#10;<!DOCTYPE html>&#10;<html>&#10;<head>&#10;  <style> body { color: red; } </style>&#10;</head>&#10;<body>...&#10;  <script> console.log('hi'); </script>&#10;</body>&#10;</html>" style="display:none;"></textarea>
+      <input type="file" id="fileInput" accept=".html,.htm,.txt" style="display:none;">
+    </div>
+  </section>
+
+  <!-- RIGHT: OUTPUT -->
+  <section class="pane">
+    <div class="pane-header">
+      <div class="tabs">
+        <button class="tab html active" data-tab="html">📄 index.html <span class="badge" id="htmlCount">0</span></button>
+        <button class="tab css" data-tab="css">🎨 style.css <span class="badge" id="cssCount">0</span></button>
+        <button class="tab js" data-tab="js">⚙️ script.js <span class="badge" id="jsCount">0</span></button>
+      </div>
+      <div class="controls">
+        <label class="checkbox">
+          <input type="checkbox" id="linkFiles" checked>
+          Link file tự động
+        </label>
+        <button class="copy-btn" id="copyBtn">📋 Copy</button>
+      </div>
+    </div>
+    <div class="pane-body">
+      <div class="output-content" id="output"></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
-  var drop = document.getElementById('drop');
-  var fileInput = document.getElementById('fileInput');
-  var statusDiv = document.getElementById('status');
-  var btnAll = document.getElementById('btnAll');
+/* =========================================================
+   Code Splitter - Core Logic
+   ========================================================= */
 
-  var cssOut = "";
-  var jsOut = "";
-  var htmlOut = "";
+// ---------- State ----------
+const state = {
+  fileName: '',
+  input: '',
+  result: { html: '', css: '', js: '' },
+  activeTab: 'html',
+  ready: false,
+  stats: { html: 0, css: 0, js: 0 }
+};
 
-  drop.addEventListener('click', function() { fileInput.click(); });
-  
-  fileInput.addEventListener('change', function(e) {
-    if (e.target.files[0]) {
-      statusDiv.innerText = "Đang đọc file...";
-      var reader = new FileReader();
-      reader.onload = function(ev) {
-        tachFile(ev.target.result);
-      };
-      reader.readAsText(e.target.files[0], 'UTF-8');
+// ---------- DOM refs ----------
+const $ = (id) => document.getElementById(id);
+const dropzone = $('dropzone');
+const inputCode = $('inputCode');
+const fileInput = $('fileInput');
+const output = $('output');
+const inputBody = $('inputBody');
+const splitBtn = $('splitBtn');
+const downloadBtn = $('downloadBtn');
+const clearBtn = $('clearBtn');
+const sampleBtn = $('sampleBtn');
+const copyBtn = $('copyBtn');
+const toast = $('toast');
+const inputStats = $('inputStats');
+const linkFiles = $('linkFiles');
+
+// ---------- Toast ----------
+let toastTimer = null;
+function showToast(msg, isError = false) {
+  toast.textContent = msg;
+  toast.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.className = 'toast' + (isError ? ' error' : '');
+  }, 3000);
+}
+
+// ---------- Stats ----------
+function updateInputStats() {
+  const text = inputCode.value;
+  const lines = text ? text.split('\n').length : 0;
+  inputStats.innerHTML = `<span>${lines.toLocaleString()} dòng</span><span>${text.length.toLocaleString()} ký tự</span>`;
+}
+
+// ---------- Show textarea / dropzone ----------
+function showEditor() {
+  dropzone.style.display = 'none';
+  inputCode.style.display = 'block';
+  inputCode.focus();
+}
+
+function showDropzone() {
+  dropzone.style.display = 'flex';
+  inputCode.style.display = 'none';
+}
+
+// ---------- Read file ----------
+function readFile(file) {
+  if (!file) return;
+
+  const validExt = ['.html', '.htm', '.txt'];
+  const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+  if (!validExt.includes(ext)) {
+    showToast('❌ Chỉ hỗ trợ file .html, .htm, .txt', true);
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('❌ File quá lớn (max 5MB)', true);
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    state.fileName = file.name;
+    state.input = e.target.result;
+    inputCode.value = state.input;
+    showEditor();
+    updateInputStats();
+    showToast(`✅ Đã tải: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`);
+  };
+
+  reader.onerror = () => {
+    showToast('❌ Lỗi đọc file', true);
+  };
+
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ---------- Drag & Drop ----------
+['dragenter', 'dragover'].forEach(evt => {
+  dropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.add('dragover');
+  });
+});
+
+['dragleave', 'drop'].forEach(evt => {
+  dropzone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropzone.classList.remove('dragover');
+  });
+});
+
+dropzone.addEventListener('drop', (e) => {
+  const files = e.dataTransfer.files;
+  if (files.length > 0) readFile(files[0]);
+});
+
+// Also allow drag-drop on textarea
+inputCode.addEventListener('dragover', (e) => e.preventDefault());
+inputCode.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if (files.length > 0) readFile(files[0]);
+});
+
+// ---------- Click dropzone to open file ----------
+dropzone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) {
+    readFile(e.target.files[0]);
+    e.target.value = '';
+  }
+});
+
+// ---------- Input paste / typing ----------
+inputCode.addEventListener('input', () => {
+  state.input = inputCode.value;
+  updateInputStats();
+});
+
+// =========================================================
+// CORE PARSER
+// =========================================================
+
+/**
+ * Tách HTML thành 3 phần:
+ * - html: HTML gốc (đã bỏ <style> và <script>)
+ * - css: gộp tất cả <style>
+ * - js: gộp tất cả <script> (không có src)
+ */
+function splitCode(rawInput) {
+  let code = rawInput || '';
+
+  // Chuẩn hóa line endings
+  code = code.replace(/\r\n?/g, '\n');
+
+  if (!code.trim()) {
+    return {
+      html: '',
+      css: '',
+      js: '',
+      error: 'Không có nội dung để tách'
+    };
+  }
+
+  // Nếu không có thẻ HTML nào, coi như toàn bộ là HTML
+  const hasHtmlTag = /<html[\s>]/i.test(code) || /<!doctype/i.test(code);
+
+  const styles = [];
+  const scripts = [];
+
+  // Regex bắt <style>...</style> (không tham lam, hỗ trợ nhiều dòng)
+  const styleRegex = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+
+  // Regex bắt <script>...</script> không có src
+  // Bắt cả <script type="module"> hoặc <script> thường
+  const scriptRegex = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+
+  // ---- Extract styles ----
+  let tempCode = code.replace(styleRegex, (match, content) => {
+    if (content && content.trim()) {
+      styles.push(content.trim());
     }
+    return ''; // Xóa khỏi HTML
   });
 
-  function tachFile(html) {
+  // ---- Extract scripts (chỉ script không có src) ----
+  // Dùng replace với callback để kiểm tra attr
+  tempCode = tempCode.replace(scriptRegex, (match, attrs, content) => {
+    const hasSrc = /\bsrc\s*=/i.test(attrs);
+    if (!hasSrc && content && content.trim()) {
+      scripts.push(content.trim());
+    }
+    // Nếu có src → giữ lại thẻ script trong HTML (vì nó là external)
+    if (hasSrc) return match;
+    return ''; // Xóa script inline
+  });
+
+  // ---- Xây CSS ----
+  const css = styles.join('\n\n/* ---- End of block ---- */\n\n');
+
+  // ---- Xây JS ----
+  const js = scripts.join('\n\n/* ---- End of block ---- */\n\n');
+
+  // ---- Xây HTML ----
+  let html = tempCode;
+
+  // Xử lý trường hợp: input không có <html> hoặc <body> đầy đủ
+  if (!hasHtmlTag) {
+    // Đây có thể là fragment - wrap cẩn thận
+    html = '<!DOCTYPE html>\n<html lang="vi">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Document</title>\n</head>\n<body>\n\n' + html + '\n\n</body>\n</html>';
+  }
+
+  // Dọn dẹp khoảng trắng thừa trong HTML (giữ nguyên cấu trúc)
+  html = html.replace(/\n{3,}/g, '\n\n');
+  html = html.trim();
+
+  // Thêm link CSS / JS nếu checkbox bật
+  const shouldLink = linkFiles.checked;
+
+  if (shouldLink && (css || js)) {
+    // Thêm <link> và <script> vào HTML
+    if (css) {
+      if (/<\/head>/i.test(html)) {
+        html = html.replace(/<\/head>/i, '  <link rel="stylesheet" href="style.css">\n</head>');
+      } else if (/<head[^>]*>/i.test(html)) {
+        html = html.replace(/(<head[^>]*>)/i, '$1\n  <link rel="stylesheet" href="style.css">');
+      }
+    }
+
+    if (js) {
+      if (/<\/body>/i.test(html)) {
+        html = html.replace(/<\/body>/i, '  <script src="script.js"><\/script>\n</body>');
+      } else {
+        html += '\n<script src="script.js"><\/script>';
+      }
+    }
+  }
+
+  // Nếu không link, và HTML có <head> đầy đủ, chèn style inline
+  if (!shouldLink && css) {
+    if (/<\/head>/i.test(html)) {
+      html = html.replace(/<\/head>/i, `  <style>\n${css}\n  </style>\n</head>`);
+    }
+  }
+  if (!shouldLink && js) {
+    if (/<\/body>/i.test(html)) {
+      html = html.replace(/<\/body>/i, `  <script>\n${js}\n  <\/script>\n</body>`);
+    }
+  }
+
+  return {
+    html: html.trim(),
+    css: css.trim(),
+    js: js.trim(),
+    error: null
+  };
+}
+
+// =========================================================
+// RENDER OUTPUT
+// =========================================================
+
+function renderOutput() {
+  const tab = state.activeTab;
+  const content = state.result[tab];
+
+  // Cập nhật tab active
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+
+  // Render nội dung
+  if (content) {
+    output.textContent = content;
+  } else {
+    const labels = {
+      html: 'index.html - Không có nội dung HTML',
+      css: 'style.css - Không có CSS (không tìm thấy thẻ <style>)',
+      js: 'script.js - Không có JS (không tìm thấy thẻ <script> inline)'
+    };
+    output.innerHTML = `<span style="color:#4a5163;">${labels[tab]}</span>`;
+  }
+
+  // Cập nhật badge count
+  $('htmlCount').textContent = state.result.html ? state.result.html.split('\n').length : 0;
+  $('cssCount').textContent = state.result.css ? state.result.css.split('\n').length : 0;
+  $('jsCount').textContent = state.result.js ? state.result.js.split('\n').length : 0;
+
+  // Enable download
+  downloadBtn.disabled = !(state.result.html || state.result.css || state.result.js);
+}
+
+// ---------- Tab switching ----------
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    state.activeTab = tab.dataset.tab;
+    renderOutput();
+  });
+});
+
+// =========================================================
+// ACTIONS
+// =========================================================
+
+// ---- Split button ----
+splitBtn.addEventListener('click', () => {
+  const raw = inputCode.value;
+
+  if (!raw.trim()) {
+    showToast('⚠️ Vui lòng nhập hoặc tải file HTML trước', true);
+    return;
+  }
+
+  // Show spinner
+  const originalText = splitBtn.innerHTML;
+  splitBtn.innerHTML = '<span class="spinner"></span> Đang tách...';
+  splitBtn.disabled = true;
+
+  // Dùng setTimeout để UI kịp update
+  setTimeout(() => {
     try {
-      var cssStart = html.indexOf('<style>');
-      var cssEnd = html.indexOf('</style>');
-      if (cssStart !== -1 && cssEnd !== -1) {
-        cssOut = html.substring(cssStart + 7, cssEnd).trim();
+      const result = splitCode(raw);
+
+      if (result.error) {
+        showToast('❌ ' + result.error, true);
+        splitBtn.innerHTML = originalText;
+        splitBtn.disabled = false;
+        return;
       }
 
-      jsOut = "";
-      var tempHtml = html;
-      while (tempHtml.indexOf('<script>') !== -1) {
-        var sStart = tempHtml.indexOf('<script>');
-        var sEnd = tempHtml.indexOf('</script>');
-        if (sStart !== -1 && sEnd !== -1) {
-          var code = tempHtml.substring(sStart + 8, sEnd);
-          jsOut += code + "\n\n";
-          tempHtml = tempHtml.substring(sEnd + 9);
-        } else {
-          break;
-        }
-      }
+      state.result = result;
+      state.ready = true;
 
-      var secStart = jsOut.indexOf("BẢO MẬT CẤP CAO");
-      if (secStart !== -1) {
-        var realStart = jsOut.lastIndexOf("(function()", secStart);
-        if (realStart !== -1) {
-          jsOut = jsOut.substring(0, realStart);
-        }
-      }
-      var secStart2 = jsOut.indexOf("BẢO MẬT THỨ HAI");
-      if (secStart2 !== -1) {
-        var realStart2 = jsOut.lastIndexOf("(function()", secStart2);
-        if (realStart2 !== -1) {
-          jsOut = jsOut.substring(0, realStart2);
-        }
-      }
+      // Đếm stats
+      state.stats.html = result.html.split('\n').length;
+      state.stats.css = result.css.split('\n').length;
+      state.stats.js = result.js.split('\n').length;
 
-      htmlOut = html.replace(/<style[\s\S]*?<\/style>/i, '<link rel="stylesheet" href="style.css">');
-      htmlOut = htmlOut.replace(/<script[\s\S]*?<\/script>/gi, '');
-      htmlOut = htmlOut.replace('</body>', '<script src="script.js"></script>\n</body>');
+      // Render
+      state.activeTab = 'html';
+      renderOutput();
 
-      statusDiv.innerText = "Tách thành công! Bấm nút bên dưới.";
-      statusDiv.style.color = "#00ff88";
-      btnAll.disabled = false;
-      
+      // Thông báo
+      const totalLines = state.stats.html + state.stats.css + state.stats.js;
+      showToast(`✅ Tách thành công! HTML: ${state.stats.html} dòng | CSS: ${state.stats.css} dòng | JS: ${state.stats.js} dòng (Tổng: ${totalLines} dòng)`);
+
     } catch (err) {
-      statusDiv.innerText = "Lỗi: File không đúng định dạng!";
-      statusDiv.style.color = "#ff3355";
+      console.error(err);
+      showToast('❌ Lỗi xử lý: ' + err.message, true);
+    } finally {
+      splitBtn.innerHTML = originalText;
+      splitBtn.disabled = false;
     }
+  }, 50);
+});
+
+// ---- Download all (ZIP) ----
+downloadBtn.addEventListener('click', async () => {
+  if (!state.result.html && !state.result.css && !state.result.js) {
+    showToast('⚠️ Chưa có dữ liệu để tải', true);
+    return;
   }
 
-  function download(filename, text) {
-    if (!text) return;
-    var blob = new Blob(['\uFEFF' + text], { type: 'text/plain;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    setTimeout(function() { URL.revokeObjectURL(url); }, 100);
-  }
+  // Nếu chỉ có 1 file → tải trực tiếp
+  const files = [
+    { name: 'index.html', content: state.result.html || '<!-- empty -->' },
+    { name: 'style.css', content: state.result.css || '/* empty */' },
+    { name: 'script.js', content: state.result.js || '// empty' }
+  ];
 
-  btnAll.addEventListener('click', function() {
-    download('style.css', cssOut);
-    setTimeout(function() { download('script.js', jsOut); }, 500);
-    setTimeout(function() { download('index.html', htmlOut); }, 1000);
-    statusDiv.innerText = "Đang tải 3 file xuống...";
+  const activeFiles = files.filter(f => {
+    if (f.name === 'index.html') return !!state.result.html;
+    if (f.name === 'style.css') return !!state.result.css;
+    if (f.name === 'script.js') return !!state.result.js;
+    return false;
   });
-</script>
 
+  if (activeFiles.length === 1) {
+    downloadFile(activeFiles[0].name, activeFiles[0].content);
+    showToast(`⬇️ Đã tải ${activeFiles[0].name}`);
+    return;
+  }
+
+  // Nhiều file → tạo ZIP thủ công (không dùng thư viện ngoài)
+  downloadBtn.innerHTML = '<span class="spinner"></span> Đang nén...';
+  downloadBtn.disabled = true;
+
+  try {
+    await new Promise(r => setTimeout(r, 100));
+    const zip = createZip(files);
+    const blob = new Blob([zip], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'code-splitter-output.zip';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('✅ Đã tải file ZIP chứa 3 file!');
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Lỗi nén ZIP: ' + err.message, true);
+  } finally {
+    downloadBtn.innerHTML = '⬇️ Tải tất cả (.zip)';
+    downloadBtn.disabled = false;
+  }
+});
+
+// ---- Download helper ----
+function downloadFile(name, content) {
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---- Clear ----
+clearBtn.addEventListener('click', () => {
+  inputCode.value = '';
+  state.input = '';
+  state.fileName = '';
+  state.result = { html: '', css: '', js: '' };
+  state.ready = false;
+  updateInputStats();
+  showDropzone();
+  output.innerHTML = '';
+  $('htmlCount').textContent = '0';
+  $('cssCount').textContent = '0';
+  $('jsCount').textContent = '0';
+  downloadBtn.disabled = true;
+  showToast('🗑️ Đã xóa tất cả');
+});
+
+// ---- Copy ----
+copyBtn.addEventListener('click', async () => {
+  const content = state.result[state.activeTab];
+  if (!content) {
+    showToast('⚠️ Không có nội dung để copy', true);
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(content);
+    showToast(`✅ Đã copy nội dung ${state.activeTab.toUpperCase()}`);
+    copyBtn.textContent = '✅ Đã copy';
+    setTimeout(() => copyBtn.textContent = '📋 Copy', 1500);
+  } catch {
+    showToast('❌ Không copy được (cần HTTPS)', true);
+  }
+});
+
+// ---- Sample ----
+sampleBtn.addEventListener('click', () => {
+  const sample = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang mẫu</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      text-align: center;
+      max-width: 400px;
+    }
+    h1 { color: #333; margin-bottom: 12px; }
+    p { color: #666; margin-bottom: 20px; }
+    button {
+      padding: 12px 28px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all .3s;
+    }
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102,126,234,.4);
+    }
+    #output { margin-top: 20px; color: #667eea; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎉 Xin chào!</h1>
+    <p>Đây là trang mẫu để test tool tách code</p>
+    <button id="clickMe">Click tôi đi!</button>
+    <div id="output"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('clickMe');
+    const output = document.getElementById('output');
+    let count = 0;
+
+    btn.addEventListener('click', () => {
+      count++;
+      output.textContent = 'Bạn đã click ' + count + ' lần!';
+      btn.textContent = 'Đã click ' + count + ' lần 🚀';
+    });
+
+    console.log('App initialized!');
+  <\/script>
+</body>
+</html>`;
+
+  inputCode.value = sample;
+  state.input = sample;
+  showEditor();
+  updateInputStats();
+  showToast('📝 Đã load code mẫu, bấm "Tách code" để thử!');
+});
+
+// =========================================================
+// MINI ZIP CREATOR (không cần thư viện ngoài)
+// =========================================================
+
+/**
+ * Tạo file ZIP đơn giản từ danh sách file.
+ * Sử dụng phương pháp "stored" (không nén) để đơn giản.
+ * Đây là implementation tối giản tuân thủ ZIP spec.
+ */
+function createZip(files) {
+  const encoder = new TextEncoder();
+
+  const fileEntries = files.map(f => {
+    const nameBytes = encoder.encode(f.name);
+    const dataBytes = encoder.encode(f.content);
+    return { name: f.name, nameBytes, dataBytes, crc: crc32(dataBytes) };
+  });
+
+  // Tính offsets
+  let offset = 0;
+  const localParts = [];
+  const centralParts = [];
+
+  fileEntries.forEach(entry => {
+    // ---- Local file header ----
+    const localHeader = new Uint8Array(30 + entry.nameBytes.length);
+    const lv = new DataView(localHeader.buffer);
+    lv.setUint32(0, 0x04034b50, true);  // signature
+    lv.setUint16(4, 20, true);          // version needed
+    lv.setUint16(6, 0, true);           // flags
+    lv.setUint16(8, 0, true);           // compression (0 = stored)
+    lv.setUint16(10, 0, true);          // mod time
+    lv.setUint16(12, 0, true);          // mod date
+    lv.setUint32(14, entry.crc, true);  // crc32
+    lv.setUint32(18, entry.dataBytes.length, true);  // compressed size
+    lv.setUint32(22, entry.dataBytes.length, true);  // uncompressed size
+    lv.setUint16(26, entry.nameBytes.length, true);  // filename length
+    lv.setUint16(28, 0, true);          // extra field length
+    localHeader.set(entry.nameBytes, 30);
+
+    localParts.push(localHeader);
+    localParts.push(entry.dataBytes);
+
+    // ---- Central directory header ----
+    const centralHeader = new Uint8Array(46 + entry.nameBytes.length);
+    const cv = new DataView(centralHeader.buffer);
+    cv.setUint32(0, 0x02014b50, true);  // signature
+    cv.setUint16(4, 20, true);          // version made by
+    cv.setUint16(6, 20, true);          // version needed
+    cv.setUint16(8, 0, true);           // flags
+    cv.setUint16(10, 0, true);          // compression
+    cv.setUint16(12, 0, true);          // mod time
+    cv.setUint16(14, 0, true);          // mod date
+    cv.setUint32(16, entry.crc, true);  // crc32
+    cv.setUint32(20, entry.dataBytes.length, true);  // compressed size
+    cv.setUint32(24, entry.dataBytes.length, true);  // uncompressed size
+    cv.setUint16(28, entry.nameBytes.length, true);  // filename length
+    cv.setUint16(30, 0, true);          // extra field length
+    cv.setUint16(32, 0, true);          // comment length
+    cv.setUint16(34, 0, true);          // disk number
+    cv.setUint16(36, 0, true);          // internal attrs
+    cv.setUint32(38, 0, true);          // external attrs
+    cv.setUint32(42, offset, true);     // local header offset
+    centralHeader.set(entry.nameBytes, 46);
+
+    centralParts.push(centralHeader);
+
+    offset += localHeader.length + entry.dataBytes.length;
+  });
+
+  // ---- End of central directory ----
+  const centralOffset = offset;
+  let centralSize = 0;
+  centralParts.forEach(p => centralSize += p.length);
+
+  const endRecord = new Uint8Array(22);
+  const ev = new DataView(endRecord.buffer);
+  ev.setUint32(0, 0x06054b50, true);   // signature
+  ev.setUint16(4, 0, true);            // disk
+  ev.setUint16(6, 0, true);            // disk with cd
+  ev.setUint16(8, fileEntries.length, true);  // entries on disk
+  ev.setUint16(10, fileEntries.length, true); // total entries
+  ev.setUint32(12, centralSize, true); // cd size
+  ev.setUint32(16, centralOffset, true); // cd offset
+  ev.setUint16(20, 0, true);           // comment length
+
+  // ---- Concat ----
+  const totalSize = offset + centralSize + endRecord.length;
+  const zip = new Uint8Array(totalSize);
+  let pos = 0;
+
+  localParts.forEach(p => { zip.set(p, pos); pos += p.length; });
+  centralParts.forEach(p => { zip.set(p, pos); pos += p.length; });
+  zip.set(endRecord, pos);
+
+  return zip;
+}
+
+// ---- CRC32 ----
+const crcTable = (() => {
+  const table = new Uint32Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let k = 0; k < 8; k++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    table[i] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(bytes) {
+  let crc = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xFF];
+  }
+  return (crc ^ 0xFFFFFFFF) >>> 0;
+}
+
+// =========================================================
+// KEYBOARD SHORTCUTS
+// =========================================================
+
+document.addEventListener('keydown', (e) => {
+  // Ctrl/Cmd + Enter: Tách code
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    splitBtn.click();
+  }
+
+  // Ctrl/Cmd + S: Tải ZIP
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    if (!downloadBtn.disabled) downloadBtn.click();
+  }
+
+  // Ctrl/Cmd + O: Mở file
+  if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+    e.preventDefault();
+    fileInput.click();
+  }
+});
+
+// =========================================================
+// INIT
+// =========================================================
+
+updateInputStats();
+showDropzone();
+renderOutput();
+
+console.log('%c⚡ Code Splitter ready!', 'color:#6c8cff;font-weight:bold;font-size:14px;');
+console.log('%cShortcuts: Ctrl+Enter (Tách) | Ctrl+S (Tải ZIP) | Ctrl+O (Mở file)', 'color:#8b93a7;font-size:12px;');
+</script>
 </body>
 </html>
